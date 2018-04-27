@@ -25,7 +25,6 @@ public class Polarity {
 
         ArrayList<Word> wordList = new ArrayList<Word>();
 
-        //Create word objects and put them to a LL
         for (int i = 0; i < words.length; i++) {
             Word temp = new Word(words[i], morphology);
             wordList.add(temp);
@@ -39,8 +38,22 @@ public class Polarity {
         wordList = luSuz(wordList);
         wordList = negativityProcess(wordList);
         degilProcess(words,wordList);
-        if(wordList.contains("ama") || wordList.contains("fakat")){
-            calculatePolarityWithAmaFakat()
+
+        /*if(words.("ama")){
+            System.out.println("asaasassasd");
+            wordList = calculatePolarityWithAmaFakat(wordList,wordList.indexOf("ama"));
+        }else if(wordList.contains("fakat")){
+            System.out.println("asaasassasdaaa");
+            wordList = calculatePolarityWithAmaFakat(wordList,wordList.indexOf("fakat"));
+        }*/
+
+        for(Word temp:wordList){
+            if(temp.getWord().equalsIgnoreCase("ama")){
+                wordList = calculatePolarityWithAmaFakat(wordList,wordList.indexOf(temp));
+            }
+            else if(temp.getWord().equalsIgnoreCase("fakat")){
+                wordList = calculatePolarityWithAmaFakat(wordList,wordList.indexOf(temp));
+            }
         }
 
         for (Word word : wordList) {
@@ -54,8 +67,8 @@ public class Polarity {
         String infinitive = null;
         String root = word.getRoot();
 
-        System.out.println("Fixing Infinitives");
-        System.out.println(word.getWord() + " -> " + word.getForm() + "\n");
+        //System.out.println("Fixing Infinitives");
+        //System.out.println(word.getWord() + " -> " + word.getForm() + "\n");
 
         //TODO: look for first vowel not second letter  DONE
 
@@ -77,22 +90,17 @@ public class Polarity {
         return infinitive;
     }
 
-    private int calculatePolarityWithAmaFakat(String sentence){
-        String[] splittedSentence;
+    private ArrayList<Word> calculatePolarityWithAmaFakat(ArrayList<Word> wordList,int indexOfAma){
 
-        if(sentence.contains("ama"))
-        {
-            splittedSentence = sentence.split("ama");
-
-            return this.calculatePolarity(splittedSentence[1].substring(1));
+        //System.out.println("ama fakat process");
+        for(int i = indexOfAma; i >= 0; i--){
+            Word temp = wordList.get(i);
+          //  System.out.println(temp.getWord() +" "+temp.getPolarity());
+            temp.setPolarity(temp.getPolarity() * -1);
+          //  System.out.println(temp.getWord() +" "+temp.getPolarity());
         }
-        else if(sentence.contains("fakat"))
-        {
-            splittedSentence = sentence.split("fakat");
 
-            return this.calculatePolarity(splittedSentence[1].substring(1));
-        }
-        return 0;
+        return wordList;
     }
 
     private void degilProcess(String[] words, List<Word> wordList) {

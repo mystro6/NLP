@@ -41,7 +41,7 @@ public class Database {
         String query;
 
         if(word.getForm().equalsIgnoreCase("verb")){
-            System.out.println("Verb");
+            //System.out.println("Verb");
             query = ("select pol from stn where kelimeName = '" + word.getInfinitive() + "'");
 
             try {
@@ -50,8 +50,8 @@ public class Database {
 
                 if(!resultSet.next()){
                     query = "select pol from stn where kelimeName = '" + word.getRoot() + "'";
-                    System.out.println("Query changed");
-                    System.out.println(query);
+                    //System.out.println("Query changed");
+                    //System.out.println(query);
                     resultSet = statement.executeQuery(query);
                 }
             } catch (SQLException e) {
@@ -63,7 +63,7 @@ public class Database {
         else{
             query = "select pol from stn where kelimeName = '" + word.getRoot() + "'";
         }
-        System.out.println(query);
+        //System.out.println(query);
 
         try {
             Statement statement = conn.createStatement();
@@ -145,8 +145,8 @@ public class Database {
         try {
             if(resultSet.next()){
                 temp.setPolarity(resultSet.getInt("pol"));
-                System.out.println(resultSet.getInt("pol"));
-                System.out.println(temp.getWord() + " " + temp.getPolarity());
+                //System.out.println(resultSet.getInt("pol"));
+                //System.out.println(temp.getWord() + " " + temp.getPolarity());
             }
         } catch (SQLException e) {
             e.printStackTrace();
