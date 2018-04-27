@@ -22,7 +22,7 @@ public class Word {
         root = analysis.get(0).getRoot();
         analysis = morphology.analyze(root);
         form = analysis.get(0).getPos().shortForm;
-        System.out.println("Word:" + word + " root:" + root + " form:" + form);
+        //System.out.println("Word:" + word + " root:" + root + " form:" + form);
     }
 
     public String getWord() {
