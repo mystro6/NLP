@@ -1,7 +1,9 @@
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import zemberek.morphology.analysis.WordAnalysis;
 import zemberek.morphology.analysis.tr.TurkishMorphology;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by Tunc on 4.03.2018.
@@ -14,14 +16,29 @@ public class Word {
     private String form;
     private String infinitive;
 
-    public Word(String word,TurkishMorphology morphology) {
+    public Word(String word,TurkishMorphology morphology){
         this.word = word;
         polarity = 0;
+        System.out.println(word);
+        List<WordAnalysis> analysis = null;
+        try{
+            analysis = morphology.analyze(word);
+        }catch (UncheckedExecutionException exception){
+            exception.printStackTrace();
+        }
 
-        List<WordAnalysis> analysis = morphology.analyze(word);
-        root = analysis.get(0).getRoot();
+
+        try{
+            root = analysis.get(0).getRoot();
+        }catch(IndexOutOfBoundsException e){
+            root = word;
+        }
         analysis = morphology.analyze(root);
-        form = analysis.get(0).getPos().shortForm;
+        try{
+            form = analysis.get(0).getPos().shortForm;
+        }catch(IndexOutOfBoundsException e){
+            form = "unk";       //Form of the word couldnt be found
+        }
         //System.out.println("Word:" + word + " root:" + root + " form:" + form);
     }
 

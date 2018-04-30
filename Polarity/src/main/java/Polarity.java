@@ -2,6 +2,7 @@ import zemberek.morphology.analysis.WordAnalysis;
 import zemberek.morphology.analysis.tr.TurkishMorphology;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by Tunc on 3.03.2018.
@@ -17,7 +18,7 @@ public class Polarity {
     public int calculatePolarity(String sentence) {
 
         int polarity = 0;
-        Database db = new Database();
+        Database db = Database.getInstance();
 
         sentence = sentence.toLowerCase();  //words in db are kept in lowercase
 
@@ -26,7 +27,8 @@ public class Polarity {
         ArrayList<Word> wordList = new ArrayList<Word>();
 
         for (int i = 0; i < words.length; i++) {
-            Word temp = new Word(words[i], morphology);
+            Word temp = null;
+            temp = new Word(words[i], morphology);
             wordList.add(temp);
         }
 
@@ -113,7 +115,7 @@ public class Polarity {
         }
 
         for(Integer index: degilIndex){
-            if(wordList.get(index - 1).getPolarity() == 0 && index -1 >= 0){
+            if(wordList.get(index - 1).getPolarity() == 0 && index -1 > 0){
                 if(wordList.get(index - 2).getPolarity() == 0 && index - 2 >= 0){
                     wordList.get(index -1 ).setPolarity(-1);
                 }else{

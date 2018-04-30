@@ -1,3 +1,8 @@
+
+
+import com.mysql.jdbc.exceptions.MySQLSyntaxErrorException;
+import javafx.scene.chart.PieChart;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,8 +15,19 @@ import java.util.List;
 public class Database {
 
     private Connection conn = null;
+    private static Database database = null;
 
-    public Database() {
+    private Database() {
+
+        connectDB();
+    }
+
+    public static Database getInstance(){
+        if(database == null){
+            database = new Database();
+        }
+
+        return database;
     }
 
     private void connectDB(){
@@ -33,9 +49,11 @@ public class Database {
 
     private ResultSet executeQuery(Word word){
 
-        if(conn == null){
+       /* if(conn == null){
             connectDB();
-        }
+        }*/
+
+
         //System.out.println(word.getWord());
         ResultSet resultSet = null;
         String query;
@@ -143,13 +161,16 @@ public class Database {
         Word temp = word;
 
         try {
-            if(resultSet.next()){
-                temp.setPolarity(resultSet.getInt("pol"));
-                //System.out.println(resultSet.getInt("pol"));
-                //System.out.println(temp.getWord() + " " + temp.getPolarity());
-            }
+            temp.setPolarity(resultSet.getInt("pol"));
+            //System.out.println(resultSet.getInt("pol"));
+            //System.out.println(temp.getWord() + " " + temp.getPolarity());
+        } catch (MySQLSyntaxErrorException e){
+            temp.setPolarity(0);
         } catch (SQLException e) {
-            e.printStackTrace();
+            temp.setPolarity(0);
+        }catch (NullPointerException e){
+            System.out.println("null pointer");
+            temp.setPolarity(0);
         }
         return temp;
     }
@@ -166,7 +187,6 @@ public class Database {
                 wordList.add(word);
             }
         }
-
         return wordList;
     }
 
