@@ -9,8 +9,11 @@ public class Main {
     public static void main(String[] args) throws IOException {
 
         TurkishMorphology morphology = TurkishMorphology.createWithDefaults();
-        DatabaseProcessor databaseProcessor = new DatabaseProcessor(morphology);
-        System.out.println(databaseProcessor.processDBData());
+        //DatabaseProcessor databaseProcessor = new DatabaseProcessor(morphology);
+        Database database = Database.getInstance();
+        int truePolarity = database.processDBData(morphology);
+        System.out.println(truePolarity + "out of 3390 is true");
+        //System.out.println(databaseProcessor.processDBData());
 /*
         Polarity polarity = new Polarity(morphology);
         int polarityNum = 0;

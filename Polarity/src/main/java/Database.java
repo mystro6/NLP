@@ -2,7 +2,9 @@
 
 import com.mysql.jdbc.exceptions.MySQLSyntaxErrorException;
 import javafx.scene.chart.PieChart;
+import zemberek.morphology.analysis.tr.TurkishMorphology;
 
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,6 +47,78 @@ public class Database {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    public int processDBData(TurkishMorphology morphology){
+        Statement statement;
+        ResultSet resultSet = null;
+        int truePolarityCount = 0;
+        Polarity polarity = new Polarity(morphology);
+
+        try{
+
+            statement = conn.createStatement();
+            // int num = 0;
+            // for(;num < 4000;num += 500){
+            resultSet = statement.executeQuery("select p_text,final_label from processed");
+            // }
+            while(resultSet.next()){
+                String text = resultSet.getString("p_text");
+                //System.out.println(text);
+                int calPolarity = polarity.calculatePolarity(text);
+                if(resultSet.getInt("final_label") == calPolarity){
+                    truePolarityCount++;
+                }
+            }
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        return truePolarityCount;
+    }
+
+    private ResultSet executeQueryToNaiveBayesPolarity(Word word){
+        ResultSet resultSet = null;
+        String query;
+
+        if(word.getForm().equalsIgnoreCase("verb")){
+            //System.out.println("Verb");
+            query = ("select NBP,NBN,NBO from naivebayespolarity where word = '" + word.getInfinitive() + "'");
+
+            try {
+                Statement statement = conn.createStatement();
+                resultSet = statement.executeQuery(query);
+
+
+                if(!resultSet.next()){
+
+                    query = "select NBP,NBN,NBO from naivebayespolarity where word = '" + word.getRoot() + "'";
+                    //System.out.println("Query changed");
+                    //System.out.println(query);
+                    resultSet = statement.executeQuery(query);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            return resultSet;
+        }
+        else{
+            query = "select NBP,NBN,NBO from naivebayespolarity where word = '" + word.getRoot() + "'";
+        }
+        //System.out.println(query);
+
+        try {
+            Statement statement = conn.createStatement();
+            resultSet = statement.executeQuery(query);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return resultSet;
+
     }
 
     private ResultSet executeQuery(Word word){
@@ -157,6 +231,37 @@ public class Database {
         return temp;
     }*/
 
+    private Word mapNaiveBayesPolarity(ResultSet resultSet, Word word) {
+        int nbp = 0;
+        int nbn = 0;
+        int nbo = 0;
+        try {
+            nbp = resultSet.getInt("NBP");
+            nbn = resultSet.getInt("NBN");
+            nbo = resultSet.getInt("NBO");
+        } catch (SQLException e) {
+            System.out.println("Word not found");
+        }catch (NullPointerException e){
+
+        }
+
+
+        int maxPolarity = 0;
+
+        if(nbp > nbn && nbp > nbn){
+            maxPolarity = 1;
+        }
+        else if(nbn > nbp && nbn > nbo){
+            maxPolarity = -1;
+        }
+        else {
+            maxPolarity = 0;
+        }
+
+        word.setPolarity(maxPolarity);
+
+        return word;
+    }
     private Word mapPolarity(ResultSet resultSet,Word word){
         Word temp = word;
 
@@ -184,6 +289,10 @@ public class Database {
                 ResultSet result = executeQuery(word);
 
                 word = mapPolarity(result, word);
+/*
+                ResultSet resultSet = executeQueryToNaiveBayesPolarity(word);
+                word = mapNaiveBayesPolarity(resultSet,word);
+*/
                 wordList.add(word);
             }
         }
